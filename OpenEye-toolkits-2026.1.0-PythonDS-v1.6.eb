@@ -1,0 +1,45 @@
+easyblock = 'Binary'
+
+name = 'OpenEye-toolkits'
+version = '2026.1.0'
+versionsuffix = '-PythonDS-v1.6'
+homepage = 'https://docs.eyesopen.com/toolkits/python/'
+description = """OpenEye Python Toolkits for the PythonDS/v1.6 container.
+Use openeye-pyds-exec python script.py, or openeye-pyds-exec bash --norc.
+The PythonDS image is not modified. Requires a valid OpenEye license.
+"""
+toolchain = SYSTEM
+
+# The small script archive and the separately supplied wheel are both verified.
+sources = [
+    'OpenEye-toolkits-2026.1.0-PythonDS-v1.6.tar.gz',
+    'openeye_toolkits-2026.1.0-py312-none-manylinux_2_28_x86_64.whl',
+]
+checksums = [
+    '9d14e7b877d4093f03b7b19137650368e5fdd9f8984457c265c12e52226f4718',
+    '68b848356145c00735bb3a22682fa2f412b186efefddf98b72b158fa941c9db8',
+]
+# Binary copies both source files to builddir; unpack only our script archive.
+extract_sources = False
+prepend_to_path = ['bin']
+
+# PythonDS is a site module, not an EasyBuild-managed Python dependency.
+dependencies = [
+    ('PythonDS/v1.6', EXTERNAL_MODULE),
+    ('OpenEye', '2026.1.0', '', SYSTEM),
+]
+
+install_cmd = (
+    'tar xzf "%(builddir)s/OpenEye-toolkits-2026.1.0-PythonDS-v1.6.tar.gz" -C "%(builddir)s" && '
+    'bash "%(builddir)s/payload/install.sh" "%(builddir)s/payload" "%(installdir)s" "%(builddir)s"'
+)
+sanity_check_paths = {
+    'files': ['bin/openeye-pyds-exec', 'share/openeye/verify.py', 'container.sha256'],
+    'dirs': ['python/openeye'],
+}
+sanity_check_commands = [
+    # License validation belongs to the explicit runtime acceptance check.
+    'openeye-pyds-exec python /opt/openeye-toolkits/share/openeye/verify.py',
+]
+modextravars = {'OPENEYE_PYDS_ROOT': '%(installdir)s'}
+moduleclass = 'chem'
